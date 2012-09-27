@@ -1,0 +1,60 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en">
+	<head>
+		<title>Wizard</title>
+		<link type="text/css" rel="stylesheet" href="css/wizard.css"/>
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+		<script src="js/mootools-1.2.5-core.js" type="text/javascript"></script>
+		<script src="js/mootools-1.2.5.1-more.js" type="text/javascript"></script>
+		<script src="js/wizard.js" type="text/javascript"></script>
+		<script type="text/javascript">
+			window.addEvent("domready",function(){
+				
+				var wizard = new Wizard($(window.document.body).getElement('.wizard')); 
+				new Wizard.Steps($('steps'),wizard);
+			});
+		</script>
+	</head>
+	<body>
+		<h1>Wizard Sample</h1>
+		<p>demo in using wizard script</p>
+		<div style="padding-left:20px">
+		<ul class="wizard">
+			<li>
+				Stage 1
+				<br />
+				<button class="nextSlide">Next</button>
+			</li>
+			<li>Stage 2
+				<br />
+				<button class="nextSlide">Next</button>
+			</li>
+			<li>Stage 3
+				<br />
+				<button class="prevSlide">Prev</button>
+				<button class="nextSlide">Next</button>
+			</li>
+			<li>Stage 4</li>
+		</ul>
+		
+		<ul id="steps">
+			<li>
+				<h2>Step 1</h2>
+				This is Step 1
+			</li>
+			<li>
+				<h2>Step 2</h2>
+				This is Step 2
+			</li>
+			<li>
+				<h2>Step 3</h2>
+				This is Step 3
+			</li>
+			<li>
+				<h2>Step 4</h2>
+				This is Step 4
+			</li>
+		</ul>
+		</div>
+	</body>
+</html>

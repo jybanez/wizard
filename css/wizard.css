@@ -1,0 +1,96 @@
+.wizardContainer .wizard,
+.wizardContainer .controls {
+	padding:0;
+	margin:0;
+}
+
+.wizardContainer .controls .prevControl {
+	float:left;
+}
+
+.wizardContainer .controls .nextControl {
+	float:right;
+}
+
+.wizardContainer .controls .prevControl,
+.wizardContainer .controls .nextControl {
+	width:28px;
+}
+
+.wizardContainer .controls .pageContainer {
+	text-align:center;
+	background-position:top left;
+	background-repeat:repeat-x;
+	overflow: hidden;
+}
+
+.wizardContainer .control {
+	background-repeat:no-repeat;
+	cursor:pointer;
+	display:inline-block;
+	*display:inline;
+	zoom:1;
+}
+.wizardContainer .pageContainer .control {
+	width:24px;
+	height:24px;
+}
+/*
+ * Moonify
+ */
+
+.moonify .pageContainer {
+	background-image:url(../images/moonify/controls_bg.png);
+}
+
+.moonify .pageContainer .control {
+	background-image:url(../images/moonify/radio.png);
+	background-position:top center;
+}
+.moonify .pageContainer .control.active {
+	background-position:bottom center;
+}
+
+.moonify .prevControl,
+.moonify .nextControl {
+	background-image:url(../images/moonify/left-right_default.png);
+}
+.moonify .prevControl.active,
+.moonify .nextControl.active {
+	background-image:url(../images/moonify/left-right.png);
+}
+.moonify .prevControl {
+	background-position:left top;
+}
+
+.moonify .nextControl {
+	background-position:right bottom;
+}
+
+
+/*
+ * Steps
+ */
+
+.basic {
+	display:block;
+	margin:0;
+	padding:0;
+	list-style: none;
+	position: relative;
+	overflow:hidden;
+}
+
+.basic li {
+	margin:0;
+	padding:0;
+	display:inline-block;
+	*display:inline;
+	zoom:1;
+	overflow:hidden;
+}
+
+.basic li.active {
+	background-color:#CCCCCC;
+}
+
