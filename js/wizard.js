@@ -15,7 +15,7 @@ var Wizard = new Class({
 	Implements:[Events,Options],
 	options:{
 		width:800,
-		height:300,
+		height:400,
 		controls:{
 			'height':24,
 			'next':'nextSlide',
@@ -65,6 +65,8 @@ var Wizard = new Class({
 		this.pageContainer = new Element('div',{'class':'pageContainer'})
 								.injectInside(this.controls)
 								;
+		this.indices = new Hash();
+		var targetTags = 'a,input,button,textarea,select'.split(',');
 		var slides = container.getChildren();
 		slides.each(function(slide,index){
 			slide.setStyles({
@@ -86,6 +88,18 @@ var Wizard = new Class({
 			if (index==slides.length-1) {
 				this.next.store('index',index);
 			}
+			
+			var els = new Array();
+			targetTags.each(function(tag){
+				els.combine(slide.getElements(tag));
+			});
+			if (els.length) {
+				els.each(function(el){
+					el.addEvent('focus',function(){ this.toPage(page); }.bind(this));
+				}.bind(this),this);
+			}
+			
+			this.indices.set(index,page);
 		}.bind(this),this);
 		this.totalPages = slides.length-1;
 		this.scroller = new Fx.Scroll(container,{
@@ -135,6 +149,13 @@ var Wizard = new Class({
 		
 		this.currentPage.addClass('active');
 	},
+	toIndex:function(index){
+		if (!this.indices.hasKey(index)) return;
+		var page = this.indices.get(index);
+		if ($defined(page)) {
+			this.toPage(page);
+		}
+	},
 	toPage:function(page){
 		if (page==this.currentPage) return;
 		
@@ -182,7 +203,9 @@ requires:
 Wizard.Steps = new Class({
 	Implements:[Events,Options],
 	options:{
-		className:'basic'
+		className:'basic',
+		trigger:true,
+		triggerClass:'.trigger'
 	},
 	initialize:function(el,wizard,options){
 		this.setOptions(options);
@@ -199,7 +222,15 @@ Wizard.Steps = new Class({
 				} else if (index==this.wizard.next.retrieve('index')) {
 					step.addClass('last');
 				}
-					
+				if (this.options.trigger) {
+					var trigger = step.getElement('.'+this.options.triggerClass);
+					if ($defined(trigger)) {
+						trigger.addEvent('click',function(e){
+							new Event(e).stop();
+							this.wizard.toIndex(index);
+						}.bind(this));
+					}
+				}
 			}.bind(this),this);
 		}
 		this.setStep();		
