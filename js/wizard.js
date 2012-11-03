@@ -16,6 +16,10 @@ var Wizard = new Class({
 	options:{
 		width:800,
 		height:400,
+		style:'slide',
+		loop:true,
+		autoPlay:true,
+		delay:3000,
 		controls:{
 			'height':24,
 			'next':'nextSlide',
@@ -31,7 +35,7 @@ var Wizard = new Class({
 	initialize:function(container,options){
 		this.setOptions(options);
 		this.container = new Element('div',{'class':'wizardContainer '+this.options.className}).injectBefore(container);
-
+		//alert(Json.toString(options));
 		container.setStyles({
 			'width':this.options.width,
 			'height':this.options.height,
@@ -54,6 +58,7 @@ var Wizard = new Class({
 						.addEvent('click',function(){this.toPrev();}.bind(this))
 						;
 		if (this.options.labels.prev) this.prev.set('html','Previous');
+		
 						
 		this.next = new Element('div',{'class':'nextControl control'})
 						.injectInside(this.controls)
@@ -61,6 +66,11 @@ var Wizard = new Class({
 						.addEvent('click',function(){this.toNext();}.bind(this))
 						;
 		if (this.options.labels.next) this.next.set('html','Next');
+		
+		if (this.options.loop) {
+			this.prev.addClass('active');
+			this.next.addClass('active');
+		}
 						
 		this.pageContainer = new Element('div',{'class':'pageContainer'})
 								.injectInside(this.controls)
@@ -72,9 +82,9 @@ var Wizard = new Class({
 			slide.setStyles({
 				'width':this.options.width,
 				'height':this.options.height,
-				'display':'block',
+				'display':this.options.style=='slide'?'block':'none',
 				'position':'absolute',
-				'left':this.options.width*index
+				'left':this.options.style=='slide'?this.options.width*index:0
 			});
 			var page = new Element('span',{'class':'control'}).injectInside(this.pageContainer).store('slide',slide)
 			page.addEvent('click',function(){
@@ -84,6 +94,7 @@ var Wizard = new Class({
 			if (!$defined(this.currentPage)) {
 				this.currentPage = page;	
 				this.prev.store('index',index);
+				slide.setStyle('display','block');
 			}
 			if (index==slides.length-1) {
 				this.next.store('index',index);
@@ -102,16 +113,18 @@ var Wizard = new Class({
 			this.indices.set(index,page);
 		}.bind(this),this);
 		this.totalPages = slides.length-1;
-		this.scroller = new Fx.Scroll(container,{
-			'link':'cancel',
-			onStart:function(){
-				this.fireEvent('start',this);
-			}.bind(this),
-			onComplete:function(){ 
-				this.fireEvent('load',this);
-				this.trackControls(); 
-			}.bind(this)
-		});
+		if (this.options.style=='slide') {
+			this.scroller = new Fx.Scroll(container,{
+				'link':'cancel',
+				onStart:function(){
+					this.fireEvent('start',this);
+				}.bind(this),
+				onComplete:function(){ 
+					this.fireEvent('load',this);
+					this.trackControls(); 
+				}.bind(this)
+			});
+		}		
 		
 		this.trackControls();
 		
@@ -136,21 +149,27 @@ var Wizard = new Class({
 		}
 	},
 	trackControls:function(){
-		if (this.getIndex()==this.prev.retrieve('index')) {
-			this.prev.removeClass('active');
-		} else {
-			this.prev.addClass('active');
-		}
-		if (this.getIndex()==this.next.retrieve('index')) {
-			this.next.removeClass('active');
-		} else {
-			this.next.addClass('active');
-		}
+		if (!this.options.loop) {
+			if (this.getIndex()==this.prev.retrieve('index')) {
+				this.prev.removeClass('active');
+			} else {
+				this.prev.addClass('active');
+			}
+			if (this.getIndex()==this.next.retrieve('index')) {
+				this.next.removeClass('active');
+			} else {
+				this.next.addClass('active');
+			}
+		} 
 		
 		this.currentPage.addClass('active');
+		
+		if (this.options.loop && this.options.autoPlay) {
+			this.toNext.delay(this.options.delay,this);
+		}
 	},
 	toIndex:function(index){
-		if (!this.indices.hasKey(index)) return;
+		if (!this.indices.has(index)) return;
 		var page = this.indices.get(index);
 		if ($defined(page)) {
 			this.toPage(page);
@@ -163,20 +182,44 @@ var Wizard = new Class({
 		if (!$defined(slide)) return;
 		
 		this.fireEvent('select',slide);
-		this.scroller.toElement(slide);
+		if (this.options.style=='slide') {
+			this.scroller.toElement(slide);
+		} else {
+			slide.setStyles({'display':'block','opacity':0});
+			var currentSlide = this.currentPage.retrieve('slide');
+			//currentSlide.injectAfter(slide);
+			new Fx.Morph(currentSlide,{
+				'link':'cancel',
+				onStart:function(){
+					this.fireEvent('start',this);
+				}.bind(this),
+				onComplete:function(){ 
+					this.fireEvent('load',this);
+					this.trackControls(); 
+					currentSlide.setStyles({'display':'none','opacity':1});
+				}.bind(this)
+			}).start({'opacity':[1,0]});
+			new Fx.Morph(slide,{'link':'cancel'}).start({'opacity':[0,1]});
+		}
+			
 		this.currentPage.removeClass('active');
+		this.lastPage = this.currentPage;
 		this.currentPage = page;
 	},
 	toPrev:function(){
 		var prev = this.currentPage.getPrevious();
 		if ($defined(prev)) {
 			this.toPage(prev);
+		} else if (this.options.loop){
+			this.toIndex(this.next.retrieve('index'));
 		}
 	},
 	toNext:function(){
 		var next = this.currentPage.getNext();
 		if ($defined(next)) {
 			this.toPage(next);
+		} else if (this.options.loop){
+			this.toIndex(this.prev.retrieve('index'));
 		}
 	},
 	getIndex:function(){

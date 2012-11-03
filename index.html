@@ -10,7 +10,7 @@
 		<script type="text/javascript">
 			window.addEvent("domready",function(){
 				
-				var wizard = new Wizard($(window.document.body).getElement('.wizard')); 
+				var wizard = new Wizard($(window.document.body).getElement('.wizard'),{'style':'slide','loop':true,'autoPlay':true}); 
 				new Wizard.Steps($('steps'),wizard);
 			});
 		</script>
@@ -24,17 +24,26 @@
 				Stage 1
 				<br />
 				<button class="nextSlide">Next</button>
+				<br />
+				<img src="images/1.jpg" alt=""/>
 			</li>
 			<li>Stage 2
 				<br />
 				<button class="nextSlide">Next</button>
+				<br />
+				<img src="images/2.jpg" alt=""/>
 			</li>
 			<li>Stage 3
 				<br />
 				<button class="prevSlide">Prev</button>
 				<button class="nextSlide">Next</button>
+				<br />
+				<img src="images/3.jpg" alt=""/>
 			</li>
-			<li>Stage 4</li>
+			<li>Stage 4
+				<br />
+				<img src="images/4.jpg" alt=""/>
+			</li>
 		</ul>
 		
 		<ul id="steps">
