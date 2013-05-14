@@ -10,7 +10,7 @@
 		<script type="text/javascript">
 			window.addEvent("domready",function(){
 				
-				var wizard = new Wizard($(window.document.body).getElement('.wizard'),{'style':'slide','loop':true,'autoPlay':true}); 
+				var wizard = new Wizard($(window.document.body).getElement('.wizard'),{'style':'fade','loop':false,'autoPlay':false,'autoHeight':true,controls:{display:'none'}}); 
 				new Wizard.Steps($('steps'),wizard);
 			});
 		</script>

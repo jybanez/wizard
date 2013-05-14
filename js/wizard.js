@@ -2,7 +2,7 @@
 ---
 script: wizard.js
 name: Wizard
-version : 1.0
+version : 1.1
 description: Stransforms a unordered list into a wizard slide-style display 
 requires:
   - Core/MooTools 1.2.5
@@ -20,10 +20,12 @@ var Wizard = new Class({
 		loop:true,
 		autoPlay:true,
 		delay:3000,
+		autoHeight:true,
 		controls:{
 			'height':24,
 			'next':'nextSlide',
-			'prev':'prevSlide'
+			'prev':'prevSlide',
+			'display':'block'
 		},
 		labels : {
 			'prev':false,
@@ -32,23 +34,28 @@ var Wizard = new Class({
 		},
 		className:'moonify'
 	},
+	maxHeight:0,
 	initialize:function(container,options){
 		this.setOptions(options);
 		this.container = new Element('div',{'class':'wizardContainer '+this.options.className}).injectBefore(container);
-		//alert(Json.toString(options));
+		
 		container.setStyles({
 			'width':this.options.width,
 			'height':this.options.height,
 			'overflow':'hidden',
 			'position':'relative',
 			'display':'block'
-		})
-		.injectInside(this.container);
-		
+		}).injectInside(this.container)
+		.set('tween',{
+			onComplete:function(){
+				this.fireEvent('onChangeHeight',this);
+			}.bind(this)
+		});
+		this.container.store('container',container);
 		this.controls = new Element('div',{'class':'controls'}).setStyles({
 			'width':this.options.width,
 			'height':this.options.controls.height,
-			'display':'block',
+			'display':this.options.controls.display,
 			'position':'relative'
 		}).injectInside(this.container);
 		
@@ -79,13 +86,17 @@ var Wizard = new Class({
 		var targetTags = 'a,input,button,textarea,select'.split(',');
 		var slides = container.getChildren();
 		slides.each(function(slide,index){
+			var scoords = slide.getCoordinates();
 			slide.setStyles({
 				'width':this.options.width,
-				'height':this.options.height,
+				'height':this.options.autoHeight?scoords.height:this.options.height,
 				'display':this.options.style=='slide'?'block':'none',
 				'position':'absolute',
 				'left':this.options.style=='slide'?this.options.width*index:0
-			});
+			}).store('height',scoords.height);
+			if (scoords.height.toInt()>this.maxHeight) {
+				this.maxHeight = scoords.height.toInt();
+			}
 			var page = new Element('span',{'class':'control'}).injectInside(this.pageContainer).store('slide',slide)
 			page.addEvent('click',function(){
 							this.toPage(page);
@@ -112,6 +123,7 @@ var Wizard = new Class({
 			
 			this.indices.set(index,page);
 		}.bind(this),this);
+		this.container.retrieve('container').setStyle('height',this.maxHeight);
 		this.totalPages = slides.length-1;
 		if (this.options.style=='slide') {
 			this.scroller = new Fx.Scroll(container,{
@@ -147,6 +159,7 @@ var Wizard = new Class({
 				}.bind(this));
 			}.bind(this),this);
 		}
+		this.container.retrieve('container').tween('height',this.getCurrentHeight());
 	},
 	trackControls:function(){
 		if (!this.options.loop) {
@@ -184,6 +197,10 @@ var Wizard = new Class({
 		this.fireEvent('select',slide);
 		if (this.options.style=='slide') {
 			this.scroller.toElement(slide);
+			if (this.options.autoHeight) {
+				this.container.retrieve('container').tween('height',page.retrieve('slide').retrieve('height'));
+			}
+			this.fireEvent('onChange',this);
 		} else {
 			slide.setStyles({'display':'block','opacity':0});
 			var currentSlide = this.currentPage.retrieve('slide');
@@ -197,6 +214,10 @@ var Wizard = new Class({
 					this.fireEvent('load',this);
 					this.trackControls(); 
 					currentSlide.setStyles({'display':'none','opacity':1});
+					if (this.options.autoHeight) {
+						this.container.retrieve('container').tween('height',page.retrieve('slide').retrieve('height'));
+					}
+					this.fireEvent('onChange',this);
 				}.bind(this)
 			}).start({'opacity':[1,0]});
 			new Fx.Morph(slide,{'link':'cancel'}).start({'opacity':[0,1]});
@@ -227,6 +248,9 @@ var Wizard = new Class({
 	},
 	getSlide:function(){
 		return this.currentPage.retrieve('slide');
+	},
+	getCurrentHeight:function(){
+		return this.getSlide().retrieve('height');
 	}
 });
 
@@ -290,5 +314,4 @@ Wizard.Steps = new Class({
 			}.bind(this),this);
 		}
 	}
-})
-
+});
